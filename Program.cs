@@ -1,5 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddJsonFile("Config/appsettings.json", optional: false, reloadOnChange: true)
+                     .AddJsonFile("Config/appsettings.Development.json", optional: true, reloadOnChange: true);
+
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

@@ -2,6 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using MoviesAPI.Data;
 using MoviesAPI.Models;
+using MoviesAPI.DTOs;
+using AutoMapper;
 
 namespace MoviesAPI.Controllers;
 
@@ -10,25 +12,29 @@ namespace MoviesAPI.Controllers;
 public class MovieController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IMapper _mapper;
 
-    public MovieController(AppDbContext context)
+    public MovieController(AppDbContext context, IMapper mapper)
     {
         _context = context;
+         _mapper = mapper;
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddMovie([FromBody] Movie movie)
+    public async Task<IActionResult> AddMovie([FromBody] CreateMovieDto movieDto)
     {
-        if (movie == null)
+         if (movieDto == null)
             return BadRequest();
 
+        var movie = _mapper.Map<Movie>(movieDto);
         _context.Movies.Add(movie);
         await _context.SaveChangesAsync();
 
         return CreatedAtAction(nameof(GetMovie),
                                new { id = movie.Id },
-                               movie);
+                               responseDto);
     }
+
 
     // GET: /Movie/{id}
     [HttpGet("{id}")]

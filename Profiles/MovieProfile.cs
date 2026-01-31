@@ -10,6 +10,7 @@ namespace MoviesAPI.Mappings
         {
             CreateMap<CreateMovieDto, Movie>();
             CreateMap<Movie, UpdateMovieDto>().ReverseMap();
+            CreateMap<Movie, ReadMovieDto>();
         }
     }
 }

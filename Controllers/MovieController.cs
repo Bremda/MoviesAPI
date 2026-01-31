@@ -34,28 +34,29 @@ public class MovieController : ControllerBase
         return CreatedAtAction(nameof(GetMovie),
                                new { id = movie.Id });
     }
+[HttpGet("{id}")]
+public async Task<ActionResult<ReadMovieDto>> GetMovie(int id)
+{
+    var movie = await _context.Movies.FindAsync(id);
+    if (movie == null)
+        return NotFound();
 
+    var movieDto = _mapper.Map<ReadMovieDto>(movie);
+    return Ok(movieDto);
+}
 
-    // GET: /Movie/{id}
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Movie>> GetMovie(int id)
-    {
-        var movie = await _context.Movies.FindAsync(id);
+[HttpGet]
+public async Task<ActionResult<IEnumerable<ReadMovieDto>>> GetMovies([FromQuery] int skip = 0, [FromQuery] int take = 10)
+{
+    var movies = await _context.Movies
+                               .Skip(skip)
+                               .Take(take)
+                               .ToListAsync();
 
-        if (movie == null)
-            return NotFound();
+    var movieDtos = _mapper.Map<IEnumerable<ReadMovieDto>>(movies);
+    return Ok(movieDtos);
+}
 
-        return movie;
-    }
-
-    [HttpGet]
-    public async Task<IEnumerable<Movie>> GetMovies([FromQuery] int skip = 0, [FromQuery] int take = 10)
-    {
-        return await _context.Movies
-                             .Skip(skip)
-                             .Take(take)
-                             .ToListAsync();
-    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateMovie(int id, [FromBody] UpdateMovieDto movieDto)
@@ -95,7 +96,7 @@ public class MovieController : ControllerBase
 
         return NoContent();
     }
-    
+
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteMovie(int id)
     {

@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using MoviesAPI.Data;
 using MoviesAPI.Models;
 
 namespace MoviesAPI.Controllers;
@@ -7,21 +9,45 @@ namespace MoviesAPI.Controllers;
 [Route("[controller]")]
 public class MovieController : ControllerBase
 {
-    private readonly static List<Movie> movies = new();
+    private readonly AppDbContext _context;
 
-    [HttpPost]
-    public IActionResult AddMovie([FromBody] Movie movie)
+    public MovieController(AppDbContext context)
     {
-       movies.Add(movie);
-
-       return CreatedAtAction(nameof(GetMovie),
-                              new { id = movie.Id },
-                              movie);
+        _context = context;
     }
 
+    [HttpPost]
+    public async Task<IActionResult> AddMovie([FromBody] Movie movie)
+    {
+        if (movie == null)
+            return BadRequest();
+
+        _context.Movies.Add(movie);
+        await _context.SaveChangesAsync();
+
+        return CreatedAtAction(nameof(GetMovie),
+                               new { id = movie.Id },
+                               movie);
+    }
+
+    // GET: /Movie/{id}
     [HttpGet("{id}")]
-    public Movie? GetMovie(int id) => movies.FirstOrDefault(movie => movie.Id == id);
+    public async Task<ActionResult<Movie>> GetMovie(int id)
+    {
+        var movie = await _context.Movies.FindAsync(id);
+
+        if (movie == null)
+            return NotFound();
+
+        return movie;
+    }
 
     [HttpGet]
-    public IEnumerable<Movie> GetMovies(int skip, int take) => movies.Skip(skip).Take(take);
+    public async Task<IEnumerable<Movie>> GetMovies([FromQuery] int skip = 0, [FromQuery] int take = 10)
+    {
+        return await _context.Movies
+                             .Skip(skip)
+                             .Take(take)
+                             .ToListAsync();
+    }
 }

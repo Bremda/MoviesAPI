@@ -11,4 +11,11 @@ public class AppDbContext : DbContext
     }
 
     public DbSet<Movie> Movies { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+{
+    modelBuilder.Entity<Movie>()
+        .Property(m => m.Id)
+        .ValueGeneratedOnAdd();
+}
 }

@@ -95,4 +95,17 @@ public class MovieController : ControllerBase
 
         return NoContent();
     }
+    
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteMovie(int id)
+    {
+        var movie = await _context.Movies.FindAsync(id);
+        if (movie == null)
+            return NotFound();
+
+        _context.Movies.Remove(movie);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }

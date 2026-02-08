@@ -1,20 +1,19 @@
 # MoviesAPI
 
 RESTful API for managing movie data, built with **ASP.NET Core (.NET 7)**.  
-The API provides endpoints to create, retrieve, update, and delete movies, using **SQLite** for data persistence and **Swagger** for API documentation.
+The API provides endpoints to create, retrieve, update, and delete movies, using **SQLite** for data persistence and **Swagger** for API documentation. **Basic Authentication** is implemented to protect write operations (POST, PUT, PATCH, DELETE).
 
 ---
 
 ## Technology Stack
 
-- ASP.NET Core Web API (.NET 7)
-- Entity Framework Core
-- SQLite
-- AutoMapper
-- Swagger (Swashbuckle)
-- Newtonsoft.Json
-
----
+- ASP.NET Core Web API (.NET 7)  
+- Entity Framework Core  
+- SQLite  
+- AutoMapper  
+- Swagger (Swashbuckle)  
+- Newtonsoft.Json  
+- Basic Authentication  
 
 ## Getting Started
 
@@ -33,6 +32,28 @@ The API will be available at:
     http://localhost:5106
 
 ---
+
+## Authentication
+
+Endpoints that **modify data** (POST, PUT, PATCH, DELETE) require **Basic Authentication**.
+
+- Username: `admin`  
+- Password: `123456`  
+
+Add the following header to your request:
+
+`Authorization: Basic YWRtaW46MTIzNDU2`
+
+(`YWRtaW46MTIzNDU2` is the Base64 encoding of `admin:123456`)
+
+### Example with curl (POST a new movie)
+
+```bash
+curl -X POST https://localhost:7106/Movie \
+-H "Authorization: Basic YWRtaW46MTIzNDU2" \
+-H "Content-Type: application/json" \
+-d '{"title":"Matrix","genre":"Sci-Fi","duration":120}'
+
 
 ## API Documentation
 

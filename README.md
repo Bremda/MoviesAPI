@@ -53,6 +53,7 @@ curl -X POST https://localhost:7106/Movie \
 -H "Authorization: Basic YWRtaW46MTIzNDU2" \
 -H "Content-Type: application/json" \
 -d '{"title":"Matrix","genre":"Sci-Fi","duration":120}'
+```
 
 
 ## API Documentation

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
 using MoviesAPI.Data;
@@ -10,6 +11,7 @@ namespace MoviesAPI.Controllers;
 
 [ApiController]
 [Route("[controller]")]
+[Authorize(AuthenticationSchemes = "BasicAuthentication")]
 public class MovieController : ControllerBase
 {
     private readonly AppDbContext _context;
@@ -25,38 +27,45 @@ public class MovieController : ControllerBase
     public async Task<IActionResult> AddMovie([FromBody] CreateMovieDto movieDto)
     {
          if (movieDto == null)
-            return BadRequest();
+        return BadRequest();
 
-        var movie = _mapper.Map<Movie>(movieDto);
-        _context.Movies.Add(movie);
-        await _context.SaveChangesAsync();
+    var movie = _mapper.Map<Movie>(movieDto);
+    _context.Movies.Add(movie);
+    await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetMovie),
-                               new { id = movie.Id });
+    var movieDtoRead = _mapper.Map<ReadMovieDto>(movie); 
+
+    return CreatedAtAction(
+        nameof(GetMovie),
+        new { id = movie.Id },  
+        movieDtoRead           
+    );
     }
-[HttpGet("{id}")]
-public async Task<ActionResult<ReadMovieDto>> GetMovie(int id)
-{
-    var movie = await _context.Movies.FindAsync(id);
-    if (movie == null)
-        return NotFound();
 
-    var movieDto = _mapper.Map<ReadMovieDto>(movie);
-    return Ok(movieDto);
-}
+    [HttpGet("{id}")]
+    [AllowAnonymous]
+    public async Task<ActionResult<ReadMovieDto>> GetMovie(int id)
+    {
+        var movie = await _context.Movies.FindAsync(id);
+        if (movie == null)
+            return NotFound();
 
-[HttpGet]
-public async Task<ActionResult<IEnumerable<ReadMovieDto>>> GetMovies([FromQuery] int skip = 0, [FromQuery] int take = 10)
-{
-    var movies = await _context.Movies
-                               .Skip(skip)
-                               .Take(take)
-                               .ToListAsync();
+        var movieDto = _mapper.Map<ReadMovieDto>(movie);
+        return Ok(movieDto);
+    }
 
-    var movieDtos = _mapper.Map<IEnumerable<ReadMovieDto>>(movies);
-    return Ok(movieDtos);
-}
+    [HttpGet]
+    [AllowAnonymous]
+    public async Task<ActionResult<IEnumerable<ReadMovieDto>>> GetMovies([FromQuery] int skip = 0, [FromQuery] int take = 10)
+    {
+        var movies = await _context.Movies
+                                   .Skip(skip)
+                                   .Take(take)
+                                   .ToListAsync();
 
+        var movieDtos = _mapper.Map<IEnumerable<ReadMovieDto>>(movies);
+        return Ok(movieDtos);
+    }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateMovie(int id, [FromBody] UpdateMovieDto movieDto)
